@@ -10,7 +10,14 @@ public class HelloWorld {
         });
         // Описываем, что загрузится по адресу /
         app.get("/", ctx -> ctx.result("Hello World"));
+
         app.get("/users", ctx -> ctx.result("GET /users"));
+        app.get("users/{id}/post/{postId}", ctx -> {
+            var userId =  ctx.pathParam("id");
+            var postId =  ctx.pathParam("postId");
+            ctx.result("GET User ID: " + userId + ", Post ID: " + postId);
+        });
+
         app.get("/hello",
                 ctx -> ctx.result("Hello, "+ctx.queryParamAsClass("name", String.class).getOrDefault("World")+"!"));
 
