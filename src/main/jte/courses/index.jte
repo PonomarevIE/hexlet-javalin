@@ -1,14 +1,8 @@
 @import org.example.hexlet.dto.courses.CoursesPage
 @param CoursesPage page
 
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Хекслет</title>
-    </head>
-    <body>
+@template.layout.page(
+    content = @`
         <h1>${page.getHeader()}</h1>
         @if(page.getCourses().isEmpty())
             <p>Пока не добавлено ни одного курса</p>
@@ -16,9 +10,11 @@
             @for(var course : page.getCourses())
                <div>
                    <h2><a href="/courses/${course.getId()}">${course.getName()}</a></h2>
-                   <p>${course.getDescription()}</p>
                </div>
             @endfor
         @endif
-    </body>
-</html>
+    `,
+    footer = @`
+        <p>Свяжитесь с нами: +7 7777777777</p>
+    `
+)
