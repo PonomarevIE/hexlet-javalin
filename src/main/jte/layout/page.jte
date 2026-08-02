@@ -20,6 +20,9 @@
                     <li >
                         <a href="/courses">Courses</a>
                     </li>
+                    <li >
+                        <a href="/users">Users</a>
+                    </li>
                 </ul>
             </div>
         </nav>

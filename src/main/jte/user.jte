@@ -1,0 +1,16 @@
+@import gg.jte.Content
+@import org.example.hexlet.model.User
+@param User user
+
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>User</title>
+    </head>
+    <body>
+        ${user.getName()}
+    </body>
+</html>
