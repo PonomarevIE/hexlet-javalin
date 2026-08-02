@@ -5,6 +5,10 @@
     content = @`
         <h1>Пользователи</h1>
 
+        <div>
+            <a href="/users/build">Зарегистрировать нового пользователя</a>
+        </div>
+
         <form action="/users" method="get">
             <input type="search" required name="term">
             <input type="submit" value="Искать">

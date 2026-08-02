@@ -11,6 +11,8 @@ import org.example.hexlet.dto.courses.CoursesPage;
 import org.example.hexlet.model.User;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.example.hexlet.repository.UserRepository;
+import org.example.hexlet.util.Security;
 
 public class HelloWorld {
     private static final List<User> USERS = Data.getUsers();
@@ -31,7 +33,7 @@ public class HelloWorld {
         });
 
         // строка адреса для проверки XSS-атаки  "http://localhost:7070/users/%3Cscript%3Ealert('attack!')%3B%3C%2Fscript%3E"
-        app.get("/users/{id}", ctx -> {
+        app.get("/users/attack/{id}", ctx -> {
             /*
             // уязвимый код
             var id = ctx.pathParam("id");
@@ -40,27 +42,43 @@ public class HelloWorld {
              */
             // render выполняет устранение уязвимости
             var id = ctx.pathParam("id");
-            var user = new User(1L, id, "", "");
+            var user = new User(id, "", "", "");
+            user.setId(1L);
 
             ctx.render("user.jte", model("user", user));
         });
 
+        app.get("/users/build", ctx -> {
+            ctx.render("users/build.jte");
+        });
+
         app.get("/users", ctx -> {
+
             var term = ctx.queryParam("term");
-            List<User> users;
+            List<User> users = UserRepository.getEntities();
+            List<User> foundUsers;
 
             if (term != null) {
-                users = USERS.stream()
+                foundUsers = users.stream()
                         .filter(u -> StringUtils.startsWithIgnoreCase(u.getFirstName(), term))
                         .toList();
             } else {
-                users = USERS;
+                foundUsers = users;
             }
-            var page = new UsersPage(users, term);
+            var page = new UsersPage(foundUsers, term);
             ctx.render("users/index.jte", model("page", page));
         });
 
-        app.post("/users", ctx -> ctx.result("POST /users"));
+        app.post("/users", ctx -> {
+            var firstName = StringUtils.capitalize(ctx.formParam("firstName"));
+            var lastName = StringUtils.capitalize(ctx.formParam("lastName"));
+            var email = ctx.formParam("email").trim().toLowerCase();
+            var password = Security.encrypt(ctx.formParam("password"));
+
+            var user = new User(firstName, lastName, email, password);
+            UserRepository.save(user);
+            ctx.redirect("/users");
+        });
 
         app.get("/hello",
                 ctx -> ctx.result("Hello, "+ctx.queryParamAsClass("name", String.class).getOrDefault("World")+"!"));

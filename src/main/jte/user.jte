@@ -11,6 +11,6 @@
         <title>User</title>
     </head>
     <body>
-        ${user.getName()}
+        ${user.getFirstName()}
     </body>
 </html>
