@@ -4,7 +4,9 @@ import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
+import io.javalin.validation.ValidationException;
 import org.example.hexlet.dto.courses.CoursePage;
+import org.example.hexlet.dto.users.BuildUserPage;
 import org.example.hexlet.dto.users.UsersPage;
 import org.example.hexlet.model.Course;
 import org.example.hexlet.dto.courses.CoursesPage;
@@ -49,7 +51,8 @@ public class HelloWorld {
         });
 
         app.get("/users/build", ctx -> {
-            ctx.render("users/build.jte");
+            var page = new BuildUserPage();
+            ctx.render("users/build.jte", model("page", page));
         });
 
         app.get("/users", ctx -> {
@@ -70,14 +73,25 @@ public class HelloWorld {
         });
 
         app.post("/users", ctx -> {
-            var firstName = StringUtils.capitalize(ctx.formParam("firstName"));
-            var lastName = StringUtils.capitalize(ctx.formParam("lastName"));
-            var email = ctx.formParam("email").trim().toLowerCase();
-            var password = Security.encrypt(ctx.formParam("password"));
+            try {
+                var firstName = StringUtils.capitalize(ctx.formParam("firstName"));
+                var lastName = StringUtils.capitalize(ctx.formParam("lastName"));
+                var email = ctx.formParam("email").trim().toLowerCase();
+                var password = ctx.formParamAsClass("password", String.class)
+                                .check(value -> value.length() > 6, "Длина пароля должна быть больше 6")
+                                .get();
+                password = Security.encrypt(password);
 
-            var user = new User(firstName, lastName, email, password);
-            UserRepository.save(user);
-            ctx.redirect("/users");
+                var user = new User(firstName, lastName, email, password);
+                UserRepository.save(user);
+                ctx.redirect("/users");
+            } catch (ValidationException e) {
+                var firstName = ctx.formParam("firstName");
+                var lastName = ctx.formParam("lastName");
+                var email = ctx.formParam("email");
+                var page = new BuildUserPage(firstName, lastName, email, e.getErrors());
+                ctx.render("users/build.jte", model("page", page)).status(422);
+            }
         });
 
         app.get("/hello",
