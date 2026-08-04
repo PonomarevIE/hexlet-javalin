@@ -50,12 +50,12 @@ public class HelloWorld {
             ctx.render("user.jte", model("user", user));
         });
 
-        app.get("/users/build", ctx -> {
+        app.get(NamedRoutes.buildUserPath(), ctx -> {
             var page = new BuildUserPage();
             ctx.render("users/build.jte", model("page", page));
         });
 
-        app.get("/users", ctx -> {
+        app.get(NamedRoutes.usersPath(), ctx -> {
 
             var term = ctx.queryParam("term");
             List<User> users = UserRepository.getEntities();
@@ -72,7 +72,7 @@ public class HelloWorld {
             ctx.render("users/index.jte", model("page", page));
         });
 
-        app.post("/users", ctx -> {
+        app.post(NamedRoutes.usersPath(), ctx -> {
             try {
                 var firstName = StringUtils.capitalize(ctx.formParam("firstName"));
                 var lastName = StringUtils.capitalize(ctx.formParam("lastName"));
@@ -97,14 +97,14 @@ public class HelloWorld {
         app.get("/hello",
                 ctx -> ctx.result("Hello, "+ctx.queryParamAsClass("name", String.class).getOrDefault("World")+"!"));
 
-         app.get("/courses/{id}", ctx -> {
+         app.get(NamedRoutes.coursePath("{id}"), ctx -> {
             var id = ctx.pathParamAsClass("id", Long.class).get();
             var course = new Course(id, "Course " + id, "Course description " + id);
             var page = new CoursePage(course);
             ctx.render("courses/show.jte", model("page", page));
         });
 
-        app.get("/courses", ctx -> {
+        app.get(NamedRoutes.coursesPath(), ctx -> {
             List<Course> courses = List.of(new Course(1L, "Course 1", "Content 1"), new Course(2L, "Course 2", "Content 2"));
             var header = "Курсы по программированию";
             var page = new CoursesPage(courses, header);
