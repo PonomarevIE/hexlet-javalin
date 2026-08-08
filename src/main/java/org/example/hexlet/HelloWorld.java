@@ -5,6 +5,7 @@ import io.javalin.rendering.template.JavalinJte;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 import io.javalin.validation.ValidationException;
+import org.example.hexlet.controller.UsersController;
 import org.example.hexlet.dto.courses.CoursePage;
 import org.example.hexlet.dto.users.BuildUserPage;
 import org.example.hexlet.dto.users.UsersPage;
@@ -50,49 +51,19 @@ public class HelloWorld {
             ctx.render("user.jte", model("user", user));
         });
 
-        app.get(NamedRoutes.buildUserPath(), ctx -> {
-            var page = new BuildUserPage();
-            ctx.render("users/build.jte", model("page", page));
-        });
+        app.get(NamedRoutes.userPath("{id}"), UsersController::show);
 
-        app.get(NamedRoutes.usersPath(), ctx -> {
+        app.get(NamedRoutes.buildUserPath(), UsersController::build);
 
-            var term = ctx.queryParam("term");
-            List<User> users = UserRepository.getEntities();
-            List<User> foundUsers;
+        app.get(NamedRoutes.usersPath(), UsersController::index);
 
-            if (term != null) {
-                foundUsers = users.stream()
-                        .filter(u -> StringUtils.startsWithIgnoreCase(u.getFirstName(), term))
-                        .toList();
-            } else {
-                foundUsers = users;
-            }
-            var page = new UsersPage(foundUsers, term);
-            ctx.render("users/index.jte", model("page", page));
-        });
+        app.post(NamedRoutes.usersPath(), UsersController::create);
 
-        app.post(NamedRoutes.usersPath(), ctx -> {
-            try {
-                var firstName = StringUtils.capitalize(ctx.formParam("firstName"));
-                var lastName = StringUtils.capitalize(ctx.formParam("lastName"));
-                var email = ctx.formParam("email").trim().toLowerCase();
-                var password = ctx.formParamAsClass("password", String.class)
-                                .check(value -> value.length() > 6, "Длина пароля должна быть больше 6")
-                                .get();
-                password = Security.encrypt(password);
+        app.delete(NamedRoutes.userPath("{id}"), UsersController::destroy); // !!! На страницах нет отправки такого запроса
 
-                var user = new User(firstName, lastName, email, password);
-                UserRepository.save(user);
-                ctx.redirect("/users");
-            } catch (ValidationException e) {
-                var firstName = ctx.formParam("firstName");
-                var lastName = ctx.formParam("lastName");
-                var email = ctx.formParam("email");
-                var page = new BuildUserPage(firstName, lastName, email, e.getErrors());
-                ctx.render("users/build.jte", model("page", page)).status(422);
-            }
-        });
+        app.get(NamedRoutes.editUserPath("{id}"), UsersController::edit);
+
+        app.post(NamedRoutes.editUserPath("{id}"), UsersController::update); // по классике должен быть метод patch - типа так app.patch("/users/{id}", UsersController::update); Но patch нельзя вызвать без JS
 
         app.get("/hello",
                 ctx -> ctx.result("Hello, "+ctx.queryParamAsClass("name", String.class).getOrDefault("World")+"!"));

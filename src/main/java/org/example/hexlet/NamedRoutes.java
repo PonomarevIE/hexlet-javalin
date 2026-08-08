@@ -16,6 +16,14 @@ public class NamedRoutes {
         return "/user/" + id;
     }
 
+    public static String editUserPath(Long id) {
+        return editUserPath(String.valueOf(id));
+    }
+
+    public static String editUserPath(String id) {
+        return "/user/" + id + "/edit";
+    }
+
     // Маршрут добавления пользователя
     public static String buildUserPath() {
         return "/users/build";
